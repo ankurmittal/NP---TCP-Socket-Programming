@@ -39,7 +39,7 @@ static void do_echo(FILE *fp, int sockfd)
 	
 int main(int argc, char **argv)
 {
-	int	 sockfd;
+	int	 sockfd, n;
 	struct sockaddr_in	servaddr;
 	
 	statusfd = fileno(stdout);
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_port   = htons(9999);	/* daytime server */
+	servaddr.sin_port   = htons(9998);	/* daytime server */
 	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
 		fprintf(fdopen(statusfd, "w+"), "inet_pton error for %s\n", argv[1]);
 		exit(0);
@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 
 	if (connect(sockfd, (SA *) &servaddr, sizeof(servaddr)) < 0)
 		show_err_sys("connect error");
+	
+	n = write(statusfd, "Echo Client Started", 20);
 
 	do_echo(stdin, sockfd);
 }

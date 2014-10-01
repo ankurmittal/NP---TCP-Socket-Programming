@@ -29,8 +29,11 @@ static void process_service(int choice, struct hostent* hostp)
 			close(pfd[0]);
 			//read_write_s = write(pfd[1], "message from child", 19);
 			if(choice == 2) {
-				read_write_s = write(pfd[1], "Starting day time server....", 29);
+				read_write_s = write(pfd[1], "Starting day time client....", 29);
 				execlp("xterm", "xterm", "-e", "./time_cli", ip, fd, (char *) 0);
+			} else if(choice == 1){
+				read_write_s = write(pfd[1], "Starting echo client....", 29);
+				execlp("xterm", "xterm", "-e", "./echo_cli", ip, fd, (char *) 0);
 			}
 			close(pfd[1]);
 			exit(0);
