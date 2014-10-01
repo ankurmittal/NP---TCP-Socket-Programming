@@ -1,23 +1,5 @@
-#include	"unp.h"
-static int statusfd;
-
-void show_err_sys(char *s) {
-	int n, buflenght;
-	char *error =  "";
-	char *colon = "";
-	if(errno !=0) {
-		error = strerror(errno);
-		colon = ": ";
-	}
-	buflenght =  strlen(error) + strlen(s) + 1 + strlen(colon);
-	char *buf  = malloc(buflenght);
-	strcpy(buf, s);
-	strcat(buf, colon);
-	strcat(buf, error);
-	n = write(statusfd, buf, buflenght);
-	getchar();
-	exit(1);
-}
+#include "unp.h"
+#include "common.h"
 
 int main(int argc, char **argv)
 {
