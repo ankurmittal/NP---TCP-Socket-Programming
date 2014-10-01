@@ -7,31 +7,48 @@ static void process_service(int choice, struct hostent* hostp)
 {	
 
 	pid_t childpid;
+	int status;
 	int read_write_s;
 	int pfd[2];
-	char buf[19];
+	char buf[MAXLINE];
+	char fd[10], *ip;
+	struct in_addr ** addr_list;
 	if (pipe(pfd) == -1)
 	{
 		perror("Pipe failed");
 		exit(1);
 	}
+	addr_list = (struct in_addr **) hostp->h_addr_list;
+	ip = inet_ntoa(*addr_list[0]);
+	sprintf(fd, "%d", pfd[1]);
 	childpid = fork();
 	if(childpid >= 0)
 	{
 		if(childpid == 0) //Child Process
 		{
 			close(pfd[0]);
-			read_write_s = write(pfd[1], "message from child", 19);
+			//read_write_s = write(pfd[1], "message from child", 19);
+			if(choice == 2) {
+				read_write_s = write(pfd[1], "Starting day time server....", 29);
+				execlp("xterm", "xterm", "-e", "./time_cli", ip, fd, (char *) 0);
+			}
 			close(pfd[1]);
 			exit(0);
 		}
 		else // Parent Process 
 		{
 			close(pfd[1]);
-			while ((read_write_s = read(pfd[0], buf, 19))
+			while ((read_write_s = read(pfd[0], buf, MAXLINE))
 					!= 0)
-				printf("child read %s\n", buf);
+				printf("Status Message: %s\n", buf);
 			close(pfd[0]);
+			waitpid(childpid, &status, 0);
+			if (WIFEXITED(status) == 0)
+				printf("Client Crashed");
+			if ( (status = WEXITSTATUS(status)) != 0)
+				printf("Client exited with error code: %d", status);
+			else
+				printf("Client Exited");
 		}
 
 	}
@@ -40,6 +57,7 @@ static void process_service(int choice, struct hostent* hostp)
 		perror("Forking failed!!!. Please try again.");
 	}
 }
+
 
 int main(int argc, char **argv)
 {
