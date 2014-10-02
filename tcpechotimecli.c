@@ -78,8 +78,9 @@ int main(int argc, char **argv)
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	//servaddr.sin_port   = htons(13);        /* daytime server */
+
 	hostp = gethostinfo(argv[1], servaddr);
+
 	close(sockfd);
 	if(hostp == NULL) 
 	{

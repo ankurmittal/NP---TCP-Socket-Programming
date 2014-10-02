@@ -5,9 +5,9 @@ void str_echo(int sockfd)
 	char buf[MAXLINE];
 again:
 	while ( (n = read(sockfd, buf, MAXLINE)) > 0)
-		Writen(sockfd, buf, n);
+		 n = write(sockfd, buf, n);
 	if (n < 0 && errno == EINTR)
 		goto again;
 	else if (n < 0)
-		err_sys("str_echo: read error");
+		perror("Can't Read from client");
 }

@@ -42,6 +42,7 @@ int main(int argc, char **argv)
 		Select(maxfdp1, &rset, NULL, NULL, NULL);
 		if (FD_ISSET(sockfd, &rset)) { /* socket is readable */
 			if ( (n = read(sockfd, recvline, MAXLINE)) == 0) {
+				close(sockfd);
 				if (stdineof == 1)
 					return; /* normal termination */
 				else

@@ -60,9 +60,9 @@ static void * echo(void *arg)
 	int connfd;
 	connfd = *((int *) arg);
 	free(arg);
-	Pthread_detach(pthread_self());
+	pthread_detach(pthread_self());
 	str_echo(connfd);
-	Close(connfd); /* done with connected socket */
+	close(connfd); /* done with connected socket */
 	return (NULL);
 }
 
@@ -72,8 +72,8 @@ static void * daytime(void *arg)
 	int connfd;
 	connfd = *((int *) arg);
 	free(arg);
-	Pthread_detach(pthread_self());
+	pthread_detach(pthread_self());
 	str_time(connfd);
-	Close(connfd); /* done with connected socket */
+	close(connfd); /* done with connected socket */
 	return (NULL);
 }

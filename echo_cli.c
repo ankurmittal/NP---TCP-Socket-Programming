@@ -69,4 +69,6 @@ int main(int argc, char **argv)
 	n = write(statusfd, "Echo Client Started", 20);
 
 	do_echo(stdin, sockfd);
+
+	close(sockfd);
 }
