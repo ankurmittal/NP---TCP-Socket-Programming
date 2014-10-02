@@ -4,7 +4,7 @@ void str_echo(int sockfd)
 	int n;
 	char buf[MAXLINE];
 again:
-	while ( (n = read(sockfd, buf, MAXLINE)) > 0)
+	while ( (n = readline(sockfd, buf, MAXLINE)) > 0)
 		 n = write(sockfd, buf, n);
 	if (n < 0 && errno == EINTR)
 		goto again;
