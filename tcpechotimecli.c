@@ -69,6 +69,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in servaddr;
 	struct hostent *hostp;
 	char term;
+	char command[15];
 
 	if (argc != 2)
 		err_quit("usage: client <IP Address or hostname>");
@@ -88,29 +89,26 @@ int main(int argc, char **argv)
 	}
 
 	do {
-		printf("\n1. Echo\n");
-		printf("2. Time\n");
-		printf("3. Exit\n");
-		printf("Please choose a option: ");
-		if(scanf("%d%c", &choice, &term) != 2 || term != '\n')
-		{
-			choice = 0;
-			do {
-				term = fgetc(stdin);
-			} while (term != '\n' && term != EOF);
-			printf("Invalid Input. Please try again.");
-		}
+		printf("\n> ");
+		fflush(stdout);
+		choice = read(fileno(stdin), command, 15);
+		command[choice - 1] = 0;
+		if(strcmp("echo", command) == 0) 
+			choice = 1;
+		else if(strcmp("time", command) == 0)
+			choice = 2;
+		else if(strcmp("quit", command) == 0)
+			choice = 3;
 		else
+			choice = -1;
+		switch(choice)
 		{
-			switch(choice)
-			{
-				case 1: 
-				case 2: process_service(choice, hostp);
-						break;
-				case 3: break;
-				default: printf("Invalid Input. Please try again.");
-			}
-		}	
+			case 1: 
+			case 2: process_service(choice, hostp);
+					break;
+			case 3: break;
+			default: printf("Command Not recognised\n");
+		}
 	} while(choice != 3);
 }
 
