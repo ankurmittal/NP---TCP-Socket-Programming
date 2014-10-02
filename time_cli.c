@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 
 	FD_ZERO(&rset);
 	n = write(statusfd, "DayTime Client Connected...", 28);
+	printf("Welcome to daytime client!!!\n");
 	for ( ; ; ) {
 		if (stdineof == 0)
 			FD_SET(fileno(stdin), &rset);

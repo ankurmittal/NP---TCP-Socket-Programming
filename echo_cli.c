@@ -67,6 +67,7 @@ int main(int argc, char **argv)
 		show_err_sys("connect error");
 	
 	n = write(statusfd, "Echo Client Started", 20);
+	printf("Welcome to echo client!!!\n");
 
 	do_echo(stdin, sockfd);
 

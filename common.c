@@ -18,6 +18,7 @@ void show_err_sys(char *s) {
 	strcat(buf, colon);
 	strcat(buf, error);
 	n = write(statusfd, buf, buflenght);
+	free(buf);
 	exit(1);
 }
 
