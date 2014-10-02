@@ -7,9 +7,9 @@ static void do_echo(FILE *fp, int sockfd)
 	fd_set rset;
 	char buf[MAXLINE];
 	stdineof = 0;
-	FD_ZERO(&rset);
 	int stdoutfd = fileno(stdout);
 	for ( ; ; ) {
+		FD_ZERO(&rset);
 		if (stdineof == 0)
 			FD_SET(fileno(fp), &rset);
 		FD_SET(sockfd, &rset);

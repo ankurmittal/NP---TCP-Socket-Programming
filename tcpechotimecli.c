@@ -51,7 +51,7 @@ static void process_service(int choice, struct hostent* hostp)
 			if ( (status = WEXITSTATUS(status)) != 0)
 				printf("Client exited with error code: %d", status);
 			else
-				printf("Client Exited");
+				printf("Client Terminated");
 		}
 
 	}

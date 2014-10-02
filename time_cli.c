@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_port   = htons(9999);	/* daytime server */
+	servaddr.sin_port   = htons(7162);	/* daytime server */
 	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
 		fprintf(fdopen(statusfd, "w+"), "inet_pton error for %s\n", argv[1]);
 		exit(0);
@@ -50,7 +50,6 @@ int main(int argc, char **argv)
 			recvline[n] = 0;	/* null terminate */
 			if (fputs(recvline, stdout) == EOF)
 				show_err_sys("fputs error");
-			getchar();
 		}
 		if (FD_ISSET(fileno(stdin), &rset)) { /* input is readable */
 			if ( (n = Read(fileno(stdin), recvline, MAXLINE)) == 0) {
@@ -59,7 +58,6 @@ int main(int argc, char **argv)
 				FD_CLR(fileno(stdin), &rset);
 				continue;
 			}
-			Writen(sockfd, recvline, n);
 		}
 	}
 	if (n < 0)

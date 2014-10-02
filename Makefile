@@ -42,6 +42,8 @@ time_cli: time_cli.o common.o
 time_cli.o: time_cli.c
 	${CC} ${CFLAGS} -c time_cli.c
 
+time_srv.o: time_srv.c
+	${CC} ${CFLAGS} -c time_srv.c
 
 echo_cli: echo_cli.o common.o
 	${CC} ${FLAGS} -o echo_cli echo_cli.o common.o ${LIBS}
@@ -54,8 +56,8 @@ echo_srv.o: echo_srv.c
 
 # server uses the thread-safe version of readline.c
 
-server: tcpechotimesrv.o readline.o echo_srv.o
-	${CC} ${FLAGS} -o server tcpechotimesrv.o echo_srv.o readline.o ${LIBS}
+server: tcpechotimesrv.o readline.o echo_srv.o time_srv.o
+	${CC} ${FLAGS} -o server tcpechotimesrv.o echo_srv.o time_srv.o readline.o ${LIBS}
 tcpechotimesrv.o: tcpechotimesrv.c
 	${CC} ${CFLAGS} -c tcpechotimesrv.c
 
@@ -76,5 +78,5 @@ common.o: common.c
 
 
 clean:
-	rm echo_cli echo_cli.o server tcpechotimesrv.o client tcpechotimecli.o time_cli time_cli.o readline.o
+	rm echo_cli server client time_cli *.o
 

@@ -1,8 +1,10 @@
 
 #include "unpthread.h"
 extern void str_echo(int);
+extern void str_time(int);
 
 static void *echo(void *); /* each thread executes this function*/
+static void *daytime(void *); /* each thread executes this function*/
 
 int main(int argc, char **argv)
 {
@@ -44,6 +46,13 @@ int main(int argc, char **argv)
 			*iptr = Accept(echofd, (SA *) &cliaddr, &clilen);
 			Pthread_create(&tid, NULL, &echo, iptr);
 		}
+
+		if (FD_ISSET(timefd, &rset)) { /* Connection coming in */
+			clilen = sizeof(cliaddr);
+			iptr = Malloc(sizeof(int));
+			*iptr = Accept(timefd, (SA *) &cliaddr, &clilen);
+			Pthread_create(&tid, NULL, &daytime, iptr);
+		}
 	}
 }
 static void * echo(void *arg)
@@ -53,6 +62,18 @@ static void * echo(void *arg)
 	free(arg);
 	Pthread_detach(pthread_self());
 	str_echo(connfd);
+	Close(connfd); /* done with connected socket */
+	return (NULL);
+}
+
+
+static void * daytime(void *arg)
+{
+	int connfd;
+	connfd = *((int *) arg);
+	free(arg);
+	Pthread_detach(pthread_self());
+	str_time(connfd);
 	Close(connfd); /* done with connected socket */
 	return (NULL);
 }

@@ -1,37 +1,41 @@
 #include	"unp.h"
 #include	<time.h>
 
-int
-main(int argc, char **argv)
+void str_time(connfd)
 {
-	int					listenfd, connfd;
-	socklen_t			len;
-	struct sockaddr_in	servaddr, cliaddr;
-	char				buff[MAXLINE];
-	time_t				ticks;
+	char buff[MAXLINE];
+	time_t ticks;
+	int maxfdp1, *iptr, n;
+	fd_set rset;
+	struct timeval interval;
+	char buf[MAXLINE];
 
-	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+	ticks = time(NULL);
+	snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
+	n = write(connfd, buff, strlen(buff));
+	for( ; ;) {
+		interval.tv_sec = 5;
+		interval.tv_usec = 0;
+		FD_ZERO(&rset);
+		FD_SET(connfd, &rset);
+		maxfdp1 = connfd + 1;
+		n = 1;
 
-	bzero(&servaddr, sizeof(servaddr));
-	servaddr.sin_family      = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port        = htons(9999);	/* daytime server */
+		if((n = select(maxfdp1, &rset, NULL, NULL, &interval)) < 0) {
+			printf("Select error");
+			return;
+		} 
+		if(n == 0) {
+			ticks = time(NULL);
+			snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
+			n = write(connfd, buff, strlen(buff));
+		}
+		if (FD_ISSET(connfd, &rset)) { /* input is readable */
+			if ( (n = read(connfd, buf, MAXLINE)) <= 0) {
+				printf("Client Exited\n");
+				return;
+			}
+		}
 
-	Bind(listenfd, (SA *) &servaddr, sizeof(servaddr));
-
-	Listen(listenfd, LISTENQ);
-
-	for ( ; ; ) {
-		len = sizeof(cliaddr);
-		connfd = Accept(listenfd, (SA *) &cliaddr, &len);
-		printf("connection from %s, port %d\n",
-			   Inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)),
-			   ntohs(cliaddr.sin_port));
-
-        ticks = time(NULL);
-        snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
-        Write(connfd, buff, strlen(buff));
-
-		Close(connfd);
 	}
 }
