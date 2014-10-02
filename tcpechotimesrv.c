@@ -14,6 +14,7 @@ int main(int argc, char **argv)
 	socklen_t clilen;
 	pthread_t tid;
 	struct sockaddr_in cliaddr, servaddr;
+	char buff[30];
 	int on = 1;
 
 	echofd = Socket (AF_INET, SOCK_STREAM, 0);
@@ -48,6 +49,9 @@ int main(int argc, char **argv)
 			clilen = sizeof(cliaddr);
 			iptr = Malloc(sizeof(int));
 			*iptr = Accept(echofd, (SA *) &cliaddr, &clilen);
+			printf("Connection to echo service from %s, port %d\n",
+			   inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)),
+			   ntohs(cliaddr.sin_port));
 			Pthread_create(&tid, NULL, &echo, iptr);
 		}
 
@@ -55,6 +59,9 @@ int main(int argc, char **argv)
 			clilen = sizeof(cliaddr);
 			iptr = Malloc(sizeof(int));
 			*iptr = Accept(timefd, (SA *) &cliaddr, &clilen);
+			printf("Connection to time service from %s, port %d\n",
+			   inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)),
+			   ntohs(cliaddr.sin_port));
 			Pthread_create(&tid, NULL, &daytime, iptr);
 		}
 	}
