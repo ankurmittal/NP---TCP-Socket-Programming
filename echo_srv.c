@@ -9,7 +9,7 @@ again:
 	if (n < 0 && errno == EINTR)
 		goto again;
 	else if (n <=0) {
-		printf("Client termination: socket read returned with value %d", n);
+		printf("Echo client termination: socket read returned with value %d", n);
 		if(n < 0)
 			printf(", errno = %d\n", errno);
 		else

@@ -33,7 +33,7 @@ void str_time(connfd)
 		if (FD_ISSET(connfd, &rset)) { /* input is readable */
 			if ( (n = read(connfd, buf, MAXLINE)) <= 0) {
 				if (!(n < 0 && errno == EINTR)) {
-					printf("Client termination: socket read returned with value %d", n);
+					printf("Time client termination: socket read returned with value %d", n);
 					if(n < 0)
 						printf(", errno = %d\n", errno);
 					else
