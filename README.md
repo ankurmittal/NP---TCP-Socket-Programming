@@ -1,24 +1,25 @@
 
 The aim of this assignment is to have you do TCP socket client / server programming using I/O multiplexing, child processes and threads. It also aims at getting you to familiarize yourselves with the inetd superserver daemon, the ‘exec’ family of functions, various socket error scenarios, some socket options, and some basic domain name / IP address conversion functions. Apart from the material in Chapters 1 to 6 covered in class, you will also need to refer to the following :
 
-the exec family of functions (Section 4.7 of Chapter 4)
+- the exec family of functions (Section 4.7 of Chapter 4)
 
-using pipes for interprocess communication (IPC) in Unix
+- using pipes for interprocess communication (IPC) in Unix
 
-error scenarios induced by process terminations & host crashes (Sections 5.11 to 5.16, Chapter 5)
+- error scenarios induced by process terminations & host crashes (Sections 5.11 to 5.16, Chapter 5)
 
-setsockopt function & SO_REUSEADDR socket option (Section 7.2 & pp.210-213, Chapter 7)
+- setsockopt function & SO_REUSEADDR socket option (Section 7.2 & pp.210-213, Chapter 7)
 
-gethostbyname & gethostbyaddr functions (Sections 11.3 & 11.4, Chapter 11)
+- gethostbyname & gethostbyaddr functions (Sections 11.3 & 11.4, Chapter 11)
 
-the basic structure of inetd (Section 13.5, Chapter 13)
+- the basic structure of inetd (Section 13.5, Chapter 13)
 
-programming with threads (Sections 26.1 to 26.5, Chapter 26)
-Overview
+- programming with threads (Sections 26.1 to 26.5, Chapter 26)
+
+**Overview**
 
 I shall present an overview of this assignment and discuss some of the specification details given below in class on Wednesday, September 17 & Monday, September 22.
 
-Client
+**Client**
 
 The client is evoked with a command line argument giving either the server IP address in dotted decimal notation, or the server domain name. The client has to be able to handle either mode and figure out which of the two is being passed to it. If it is given the IP address, it calls the gethostbyaddr function to get the domain name, which it then prints out to the user in the form of an appropriate message (e.g., ‘The server host is compserv1.cs.stonybrook.edu’). The function gethostbyname, on the other hand, returns the IP address that corresponds to a given domain name.
 The client then enters an infinite loop in which it queries the user which service is being requested. There are two options : echo and time (note that time is a slightly modified version of the daytime service – see below). The client then forks off a child. After the child is forked off, the parent process enters a second loop in which it continually reads and prints out status messages received from the child via a half-duplex pipe (see below). The parent exits the second loop when the child closes the pipe (how does the parent detect this?), and/or the SIGCHLD signal is generated when the child terminates. The parent then repeats the outer loop, querying the user again for the (next) service s/he desires. This cycle continues till the user responds to a query with quit rather than echo or time.
@@ -35,7 +36,7 @@ When the child terminates, either normally or abnormally, its xterm window disap
 
 In general, you should try to make your code as robust as possible with respect to handling errors, including confused behaviour by the user (e.g., passing an invalid command line argument; responding to a query incorrectly; trying to interact with the service through the parent process window, not the child process xterm; etc.). Amongst other things, you have to worry about EINTR errors occurring during slow system calls (such as the parent reading from the pipe, or, possibly, printing to stdout, for example) due to a SIGCHLD signal. What about other kinds of errors? Which ones can occur? How should you handle them?
 
-Server
+**Server**
 
 The server has to be able to handle multiple clients using threads (specifically, detached threads), not child processes (see Sections 26.1 to 26.4, Chapter 26). Furthermore, it has to be able to handle multiple types of service; in our case, two : echo and time. echo is just the standard echo service we have seen in class. time is a slightly modified version of the daytime service (see Figure 1.9, p.14) : instead of sending the client the ‘daytime’ just once and closing, the service sits in an infinite loop, sending the ‘daytime’, sleeping for 5 seconds, and repeating, ad infinitum.
 
@@ -43,7 +44,7 @@ The server is loosely based on the way the inetd daemon works : see Figure 13.7,
 
 The server creates a listening socket for each type of service that it handles, bound to the ‘well-known port’ for that service. It then uses select to await clients (Chapter 6; or, if you prefer, poll; note that pselect is not supported in Solaris 2.10). The socket on which a client connects identifies the service the client is seeking. The server accepts the connection and creates a thread which provides the service. The thread detaches itself. Meanwhile, the main thread goes back to the select to await further clients.
 
-A major concern when using threads is to make sure that operations are thread safe (see p.685 and on into Section 26.5). In this respect, Stevens’ readline function (in Stevens’ file unpv13e/lib/readline.c, see Figure 3.18, pp.91-92) poses a particular problem. On p.686, the authors give three options for dealing with this. The third option is too inefficient and should be discarded. You can implement the second option if you wish. Easiest of all would be the first option, since it involves using a thread-safe version of readline (see Figures 26.11 & 26.12) provided in file unpv13e/threads/readline.c. Whatever you do, remember that Stevens’ library, libunp.a, contains the non-thread-safe version of Figure 3.18, and that is the version that will be link-loaded to your code unless you undertake explicit steps to ensure this does not happen (libunp.a also contains the ‘wrapper’ function Readline, whose code is also in file unpv13e/lib/readline.c). Remaking your copy of libunp.a with the ‘correct’ version of readline is not a viable option because when you hand in your code, it will be compiled and link-loaded with respect to the version of libunp.a in the course account, ~cse533/Stevens/unpv13e_solaris2.10 (I do not intend to change that version since it risks creating confusion later on in the course). Also, you will probably want to use the original version of readline in the client code anyway. I am providing you with a sample Makefile which picks up the thread-safe version of readline from directory ~cse533/Stevens/unpv13e_solaris2.10/threads and uses it when making the executable for the server, but leaves the other executables it makes to link-load the non-thread-safe version from libunp.a.
+A major concern when using threads is to make sure that operations are thread safe (see p.685 and on into Section 26.5). In this respect, Stevens’ readline function (in Stevens’ file unpv13e/lib/readline.c, see Figure 3.18, pp.91-92) poses a particular problem. On p.686, the authors give three options for dealing with this. The third option is too inefficient and should be discarded. You can implement the second option if you wish. Easiest of all would be the first option, since it involves using a thread-safe version of readline (see Figures 26.11 & 26.12) provided in file unpv13e/threads/readline.c. Whatever you do, remember that Stevens’ library, libunp.a, contains the non-thread-safe version of Figure 3.18, and that is the version that will be link-loaded to your code unless you undertake explicit steps to ensure this does not happen (libunp.a also contains the ‘wrapper’ function Readline, whose code is also in file unpv13e/lib/readline.c). Remaking your copy of libunp.a with the ‘correct’ version of readline is not a viable option because when you hand in your code, it will be compiled and link-loaded with respect to the version of libunp.a in the course account, ~cse533/Stevens/unpv13e\_solaris2.10 (I do not intend to change that version since it risks creating confusion later on in the course). Also, you will probably want to use the original version of readline in the client code anyway. I am providing you with a sample Makefile which picks up the thread-safe version of readline from directory ~cse533/Stevens/unpv13e_solaris2.10/threads and uses it when making the executable for the server, but leaves the other executables it makes to link-load the non-thread-safe version from libunp.a.
 
 Again, it is part of your responsibility to make sure that your server code is as robust as possible with respect to errors, and that the server threads terminate cleanly under all circumstances. Recall, first of all, that the client user will often use ^C (CTRL C) in the xterm to terminate the service. This will appear to the server thread as if the client process has crashed. You need to think about the error conditions that will be induced (see Sections 5.11 to 5.13, Chapter 5), and how the echo and time server code is to detect and handle these conditions. For example, the time server will almost certainly experience an EPIPE error (see Section 5.13). How should the associated SIGPIPE signal be handled? Be aware that when we return out of the Stevens’ writen function with -1 (indicating an error) and check errno, errno is sometimes equal to 0, not EPIPE (value 32). This can happen under Solaris 2.10, but I am not sure under precisely what conditions nor why. Nor am I sure if it also happens under other Unix versions, or if it also happens when using write rather than writen. The point is, you cannot depend on errno to find out what has happened to the write or writen functions. My suggestion, therefore, is that the time server should use the select function. On the one hand, select’s timeout mechanism can be used to make the server sleep for the 5 seconds. On the other hand, select should also monitor the connection socket read event because, when the client xterm is ^C’ed, a FIN will be sent to the server TCP, which will prime the socket for reading; a read on the socket will then return with value 0 (see Figure 14.3, p. 385 as an example).
 
@@ -51,11 +52,11 @@ But what about errors other than EPIPE? Which ones can occur? How should you han
 
 Whenever a server thread detects the termination of its client, it should print out a message giving appropriate details: e.g., “Client termination: EPIPE error detected”, “Client termination: socket read returned with value 0”, “Client termination: socket read returned with value -1, errno = . . .”, and so on.
 
-When debugging your server code, you will probably find that restarting the server very shortly after it was last running will give you trouble when it comes to bind to its ‘well-known ports’. This is because, when the server side initiates connection termination (which is what will happen if the server process crashes; or if you kill it first, before killing the client) TCP keeps the connections open in the TIME_WAIT state for 2MSLs (Sections 2.6 & 2.7, Chapter 2). This could very quickly become a major irritant. I suggest you explore the possibility of using the SO_REUSEADDR socket option (pp.210-213, Chapter 7; note that the SO_REUSEPORT socket option is not supported in Solaris 2.10), which should help keep the stress level down. You will need to use the setsockopt function (Section 7.2) to enable this option. Figure 8.24, p.263, shows an instance of server code that sets the SO_REUSEADDR socket option.
+When debugging your server code, you will probably find that restarting the server very shortly after it was last running will give you trouble when it comes to bind to its ‘well-known ports’. This is because, when the server side initiates connection termination (which is what will happen if the server process crashes; or if you kill it first, before killing the client) TCP keeps the connections open in the TIME\_WAIT state for 2MSLs (Sections 2.6 & 2.7, Chapter 2). This could very quickly become a major irritant. I suggest you explore the possibility of using the SO\_REUSEADDR socket option (pp.210-213, Chapter 7; note that the SO\_REUSEPORT socket option is not supported in Solaris 2.10), which should help keep the stress level down. You will need to use the setsockopt function (Section 7.2) to enable this option. Figure 8.24, p.263, shows an instance of server code that sets the SO_REUSEADDR socket option.
 
 Finally, you should be aware of the sort of problem, described in Section 16.6, pp.461-463, that might occur when (blocking) listening sockets are monitored using select. Such sockets should be made nonblocking, which requires use of the fcntl  function after socket creates the socket, but before listen turns the socket into a listening socket.
 
-Hand-in
+**Hand-in**
 
 The criterion for a successful assignment is that it execute correctly on the Solaris 10 compserv (not the Linux compute) nodes in the cs.stonybrook.edu domain. We shall be testing your code by running clients and server between the following machines, to which you also have access in order to test your code before handing in.
 
