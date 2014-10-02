@@ -34,7 +34,7 @@ FLAGS = -g -O2
 
 CFLAGS = ${FLAGS} -I${slib}/lib
 
-all: client server echo_cli time_cli echo_srv
+all: client server echo_cli time_cli
 
 
 time_cli: time_cli.o common.o
@@ -49,15 +49,13 @@ echo_cli.o: echo_cli.c
 	${CC} ${CFLAGS} -c echo_cli.c
 
 
-echo_srv: echo_srv.o
-	${CC} ${FLAGS} -o echo_srv echo_srv.o ${LIBS}
 echo_srv.o: echo_srv.c 
 	${CC} ${CFLAGS} -c echo_srv.c
 
 # server uses the thread-safe version of readline.c
 
-server: tcpechotimesrv.o readline.o
-	${CC} ${FLAGS} -o server tcpechotimesrv.o readline.o ${LIBS}
+server: tcpechotimesrv.o readline.o echo_srv.o
+	${CC} ${FLAGS} -o server tcpechotimesrv.o echo_srv.o readline.o ${LIBS}
 tcpechotimesrv.o: tcpechotimesrv.c
 	${CC} ${CFLAGS} -c tcpechotimesrv.c
 
