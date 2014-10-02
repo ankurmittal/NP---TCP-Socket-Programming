@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	{
 		exit(-1);
 	}
-
+	printf("Commands supported: echo, time, quit\n");
 	do {
 		printf("\n> ");
 		fflush(stdout);
