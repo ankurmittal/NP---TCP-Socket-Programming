@@ -14,9 +14,13 @@ int main(int argc, char **argv)
 	socklen_t clilen;
 	pthread_t tid;
 	struct sockaddr_in cliaddr, servaddr;
+	int on = 1;
 
 	echofd = Socket (AF_INET, SOCK_STREAM, 0);
 	timefd = Socket (AF_INET, SOCK_STREAM, 0);
+	
+	Setsockopt(echofd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+	Setsockopt(timefd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;

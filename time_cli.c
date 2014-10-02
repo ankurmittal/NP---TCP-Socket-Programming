@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 		show_err_sys("connect error");
 
 	FD_ZERO(&rset);
+	n = write(statusfd, "DayTime Client Connected...", 28);
 	for ( ; ; ) {
 		if (stdineof == 0)
 			FD_SET(fileno(stdin), &rset);
